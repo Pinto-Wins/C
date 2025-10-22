@@ -1,7 +1,8 @@
 //Bibliotecas
-#include <stdio.h> /*Permite a utilizaÁ„o de operaÁıes de input e output*/
-#include <string.h>/*Permite a utilizaÁ„o de strings e da sua comparaÁ„o*/
-#include <locale.h>/*Permite a utilizaÁ„o de caracteres portugueses*/
+#include <stdio.h> /*Permite a utiliza√ß√£o de opera√ß√µes de input e output*/
+#include <string.h>/*Permite a utiliza√ß√£o de strings e da sua compara√ß√£o*/
+#include <locale.h>/*Permite a utiliza√ß√£o de caracteres portugueses*/
+#include <stdlib.h>/*system, size_t*/
 
 //definicao das constantes
 #define tamnome 100
@@ -9,270 +10,269 @@
 #define numpessoas 200
 #define tamamigos 50
 #define tamlogin 30
-#define tamsenha 10
+#define tamsenha 11     /* 10 chars + '\0' */
 #define tammail 100
 #define tamutilizadores 200
 #define tamdatanascimento 30
 
-//Vari·veis Globais
+// Helpers de input seguros
+static void clear_input_buffer(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {}
+}
+
+static void read_line(char *buf, size_t size) {
+    if (!buf || size == 0) return;
+    if (fgets(buf, (int)size, stdin)) {
+        size_t len = strlen(buf);
+        if (len > 0 && buf[len - 1] == '\n') buf[len - 1] = '\0';
+        else clear_input_buffer(); // remove resto da linha se excedeu o buffer
+    } else {
+        buf[0] = '\0';
+        clear_input_buffer();
+    }
+}
+
+//Vari√°veis Globais
 char numeroAmigos[tamamigos];
 char data_de_nascimento[tamdatanascimento], nome[tamnome], mail[tammail];
 char login[tamlogin], senha[tamsenha], login1[tamlogin], senha1[tamsenha];
 long int telefone, diadenascimento,  mesdenascimento, anodenascimento;
 
-//definiÁao de tipos
+//defini√ß√£o de tipos
 typedef struct
 {
-	char nome[tamnome];
-	char mail[tammail];
-	long int diadenascimento;
-	long int mesdenascimento;
-	long int anodenascimento;
-	long int telefone;
-	char login[tamlogin];
-	char senha[tamsenha];
-		
-}Assinante;
+    char nome[tamnome];
+    char mail[tammail];
+    long int diadenascimento;
+    long int mesdenascimento;
+    long int anodenascimento;
+    long int telefone;
+    char login[tamlogin];
+    char senha[tamsenha];
+} Assinante;
 
-typedef struct
-{
-	char login1[tamlogin];
-	char senha1[tamsenha];
-}Login;
-	
-
-
-//funÁıes
+//fun√ß√µes
 
 //decisoes
-void decisao1() /*Menu secund·rio*/
+void decisao1() /*Menu secund√°rio*/
 {
-    system("cls");/*Para limpar o ecr„*/
+    system("cls");/*Para limpar o ecr√£*/
 
     int op10;
 
-    printf("\n\n\t1 - P·gina Principal");
+    printf("\n\n\t1 - P√°gina Principal");
     printf("\n\n\t2 - Perfil");
     printf("\n\n\t0 - Voltar");
-    printf("\n\nInsira a sua opÁ„o: ");
+    printf("\n\nInsira a sua op√ß√£o: ");
     scanf("%d", &op10);
-    fflush(stdin);
+    clear_input_buffer();
 
     switch (op10)
     {
         case 1:
-        	printf("A voltar ao menu principal...\n");
+            printf("A voltar ao menu principal...\n");
             system("pause");
             break;
         case 2:
-			printf("N„o disponÌvel :(\n\n");
-			printf("A voltar ao menu principal...\n");
+            printf("N√£o dispon√≠vel :(\n\n");
+            printf("A voltar ao menu principal...\n");
             system("pause");
             break;
         case 0:
             printf("A voltar ao menu principal...\n");
             system("pause");
+            break;
         default:
-        	printf("OpÁ„o inv·lida, a voltar ao menu principal...\n");
-        	system("pause");
-    }  
+            printf("Op√ß√£o inv√°lida, a voltar ao menu principal...\n");
+            system("pause");
+            break;
+    }
 }
 
 //Registo
 void InserirDados(Assinante pessoas[], int *totalpessoas){ /*Registo de Utilizador*/
-	
-	system("cls");/*Para limpar o ecr„*/
-	
-	Assinante ass;
-	
-	printf("\n\nInsira o seu primeiro nome: ");
-	fflush (stdin); gets (ass.nome);
-	
-	printf("\nInsira o dia em que nasceu: ");
-	scanf("%d", &ass.diadenascimento);
-	
-	printf("\nEm que mÍs: ");
-	scanf("%d", &ass.mesdenascimento);
-	
-	printf("\nEm que ano: ");
-	scanf("%d", &ass.anodenascimento);
-	
-	printf("\nInsira o seu e-mail: ");
-	fflush (stdin); gets (ass.mail);
-	
-	printf("\nInsira o seu n˙mero de telefone: ");
-	scanf("%d", &ass.telefone);
-		
-	printf("\nEscolha um nome de utilizador pretendido: ");
-	scanf("%s", ass.login);
-	
-	printf("\nEscolha agora uma senha atÈ 10 caracteres: ");
-	scanf("%s", ass.senha);
-	
-	
-	pessoas[*totalpessoas]=ass;
-	(*totalpessoas)++;
+    system("cls");/*Para limpar o ecr√£*/
+
+    if (*totalpessoas >= numpessoas) {
+        printf("Capacidade esgotada.\n");
+        system("pause");
+        return;
+    }
+
+    Assinante ass;
+
+    printf("\n\nInsira o seu primeiro nome: ");
+    read_line(ass.nome, sizeof ass.nome);
+
+    printf("\nInsira o dia em que nasceu: ");
+    scanf("%ld", &ass.diadenascimento);
+    clear_input_buffer();
+
+    printf("\nEm que m√™s: ");
+    scanf("%ld", &ass.mesdenascimento);
+    clear_input_buffer();
+
+    printf("\nEm que ano: ");
+    scanf("%ld", &ass.anodenascimento);
+    clear_input_buffer();
+
+    printf("\nInsira o seu e-mail: ");
+    read_line(ass.mail, sizeof ass.mail);
+
+    printf("\nInsira o seu n√∫mero de telefone: ");
+    scanf("%ld", &ass.telefone);
+    clear_input_buffer();
+
+    printf("\nEscolha um nome de utilizador pretendido: ");
+    read_line(ass.login, sizeof ass.login);
+
+    printf("\nEscolha agora uma senha at√© 10 caracteres: ");
+    read_line(ass.senha, sizeof ass.senha);
+
+    pessoas[*totalpessoas]=ass;
+    (*totalpessoas)++;
 }
 
 //Login
+void funcaoLogin (int totalpessoas, Assinante pessoas[]) { /*Autentica√ß√£o do Utilizador*/
+    system ("cls");/*Para limpar o ecr√£*/
 
-void funcaoLogin (int totalpessoas, Assinante pessoas[]) { /*AutenticaÁ„o do Utilizador*/
-	
-	system ("cls");/*Para limpar o ecr„*/
-	
-	int opcaol;
-	char nomeAprocurar[tamlogin];
-	char senhaAprocurar[tamsenha];
-	int i=0, encontrou=0;
-	
-	printf ("Introduza o nome de utilizador: ");
-	fflush(stdin); gets(nomeAprocurar);
-	printf ("Introduza a sua senha: ");
-	fflush(stdin); gets(senhaAprocurar);
-	
-	system("cls");/*Para limpar o ecr„*/
-	while (i<totalpessoas && encontrou==0)
-	{
-		if (strcmp(pessoas[i].login,nomeAprocurar)==0 && strcmp(pessoas[i].senha,senhaAprocurar)==0 ){/*comparaÁ„o das vari·veis com as strings dos dados registados*/
-		   
-    		printf("*         Bem Vindo          *\n");
-   		 	
-   		 	system("pause");
-   		 	
-   		encontrou=1;
-		   	
-	    decisao1(); /*direcionamento para o menu secund·rio*/
-	    
-		}
-		i++;	
-	}
-	
-    if (encontrou==0)
-	printf ("\n\nDados Inv·lidos!\n\n");		
-	
-    system("pause");
-		
+    char nomeAprocurar[tamlogin];
+    char senhaAprocurar[tamsenha];
+    int i=0, encontrou=0;
+
+    printf ("Introduza o nome de utilizador: ");
+    read_line(nomeAprocurar, sizeof nomeAprocurar);
+    printf ("Introduza a sua senha: ");
+    read_line(senhaAprocurar, sizeof senhaAprocurar);
+
+    system("cls");/*Para limpar o ecr√£*/
+    while (i<totalpessoas && !encontrou)
+    {
+        if (strcmp(pessoas[i].login,nomeAprocurar)==0 && strcmp(pessoas[i].senha,senhaAprocurar)==0){
+            printf("*         Bem Vindo          *\n");
+            system("pause");
+            encontrou=1;
+            decisao1(); /*direcionamento para o menu secund√°rio*/
+            break;
+        }
+        i++;
+    }
+
+    if (!encontrou) {
+        printf ("\n\nDados Inv√°lidos!\n\n");
+        system("pause");
+    }
 }
 
 void listardados(Assinante pessoas[], int totalpessoas){ /*lista os dados completos de todas as contas existentes*/
-	
-	system("cls");/*Para limpar o ecr„*/
-	
-	int i, user;
-	
-	printf("Inicie sess„o com Administrador:\n User: ");
-	scanf("%d", &user);
-	
-	if(user == 0000){ /*FunÁ„o que verifica as permissıes do utilizador*/
-	
-		for(i=0; i<totalpessoas; i++)
-		{		
-			printf("\n nome: %s\n", pessoas[i].nome);
-			printf(" nome de utilizador: %s\n", pessoas[i].login);
-			printf(" e-mail: %s\n", pessoas[i].mail);
-			printf(" telefone: %d\n", pessoas[i].telefone);
-			printf(" data de nascimento: %d / %d / %d\n", pessoas[i].diadenascimento, pessoas[i].mesdenascimento, pessoas[i].anodenascimento);
-			printf(" senha: %s\n", pessoas[i].senha);
-			
-		}
-	
-	}
-	
-	else{
-	
-		printf("*   N„o tem autorizaÁ„o   *");
-	
-	} 
-	
-	system("pause");
+    system("cls");/*Para limpar o ecr√£*/
+
+    int i, user;
+
+    printf("Inicie sess√£o com Administrador:\n User: ");
+    scanf("%d", &user);
+    clear_input_buffer();
+
+    if(user == 0000){ /*Fun√ß√£o que verifica as permiss√µes do utilizador*/
+        for(i=0; i<totalpessoas; i++)
+        {
+            printf("\n nome: %s\n", pessoas[i].nome);
+            printf(" nome de utilizador: %s\n", pessoas[i].login);
+            printf(" e-mail: %s\n", pessoas[i].mail);
+            printf(" telefone: %ld\n", pessoas[i].telefone);
+            printf(" data de nascimento: %ld / %ld / %ld\n", pessoas[i].diadenascimento, pessoas[i].mesdenascimento, pessoas[i].anodenascimento);
+            // N√£o imprimir senha por seguran√ßa
+        }
+    } else {
+        printf("*   N√£o tem autoriza√ß√£o   *");
+    }
+
+    system("pause");
 }
 
 void consultardados(Assinante pessoas[], int totalpessoas) /*consulta os dados de uma conta em especifico*/
-{ 
-	
-	system("cls");/*Para limpar o ecr„*/
-	
-	char nome1[tamnome];
-	int i=0, encontrou=0;
-	
-	printf("Introduza a conta a procurar: "); /*insere-se o nome de utilizador para procurar a conta*/
-	fflush(stdin); //clears the output buffer//
-	gets(nome1);	
-		
-	while(i<totalpessoas && encontrou==0)
-	{
-	
-		if(strcmp(pessoas[i].login, nome1)==0) /*compara os nomes de utilizador registados no Array com o nome a procurar*/
-		{
-			
-			printf("\n nome: %s\n", pessoas[i].nome);
-			printf(" data de nascimento: %d / %d / %d\n", pessoas[i].diadenascimento, pessoas[i].mesdenascimento, pessoas[i].anodenascimento);
-			
-		}
-			else{
-			
-				printf("\nnome n„o encontrado.");
-				
-				}
-				
-	i++;
-	}	
-}
+{
+    system("cls");/*Para limpar o ecr√£*/
 
+    char nome1[tamnome];
+    int i=0, encontrou=0;
+
+    printf("Introduza a conta a procurar: ");
+    read_line(nome1, sizeof nome1);
+
+    while(i<totalpessoas)
+    {
+        if(strcmp(pessoas[i].login, nome1)==0)
+        {
+            printf("\n nome: %s\n", pessoas[i].nome);
+            printf(" data de nascimento: %ld / %ld / %ld\n", pessoas[i].diadenascimento, pessoas[i].mesdenascimento, pessoas[i].anodenascimento);
+            encontrou = 1;
+            break;
+        }
+        i++;
+    }
+
+    if (!encontrou) {
+        printf("\nnome n√£o encontrado.\n");
+    }
+    system("pause");
+}
 
 int main()
 {
-	
-	setlocale(LC_ALL, "Portuguese"); /*Permite a utilizaÁ„o de caracteres portugueses*/
-	
-	int totalpessoas = 0;
-	
-	Assinante pessoas[numpessoas];
-	
-	int opcao, datahj;
-	
-	printf(" Ol·!!\nInsira a data de hoje (n„o separe os n˙meros):"); /*NoÁ„o de Tempo*/
-	scanf("%d", &datahj);
-	
-	do{ 
-		system("cls");/*Para limpar o ecr„*/
-		
-		printf("Menu Inicial\n\n  data:*   %d   *   \n\n", datahj);
-		printf("1- Registar\n");
-		printf("2- Login\n");
-		printf("3- Procurar utilizador\n");
-		printf("4- Listar utilizadores\n");
-		printf("5- Total de assinantes\n");
-		printf("6- Modo AnÙnimo\n");
-		printf("0- sair\n");
-		printf("Escolha uma opÁao:\n");
-		scanf("%d", &opcao);
-	
-		switch(opcao){
-			case 1: InserirDados(pessoas, &totalpessoas);
-				break;
-			case 2:	funcaoLogin(totalpessoas, pessoas);
-				break;
-			case 3: consultardados(pessoas, totalpessoas); 
-				break;
-			case 4: listardados(pessoas, totalpessoas);
-			    break;
-			case 5: printf("\n total de assinantes: %d\n", totalpessoas);
-				break;
-			case 6:
-			system("cls");
-			printf("*   Bem vindo ¥no one`\n   *");
-				break;
-			case 0: system("cls");/*Para limpar o ecr„*/
-			
-            	printf("\n\nVolte Sempre\n");
-            	system("pause");
-				break;
-			default: printf("OpÁao invalida");
-		}
-		system ("pause");
-	} while (opcao!=0);
-	
-	return 1;
-	
+    setlocale(LC_ALL, "Portuguese"); /*Permite a utiliza√ß√£o de caracteres portugueses*/
+
+    int totalpessoas = 0;
+    Assinante pessoas[numpessoas];
+
+    int opcao, datahj;
+
+    printf(" Ol√°!!\nInsira a data de hoje (n√£o separe os n√∫meros):"); /*No√ß√£o de Tempo*/
+    scanf("%d", &datahj);
+    clear_input_buffer();
+
+    do{
+        system("cls");/*Para limpar o ecr√£*/
+
+        printf("Menu Inicial\n\n  data:*   %d   *   \n\n", datahj);
+        printf("1- Registar\n");
+        printf("2- Login\n");
+        printf("3- Procurar utilizador\n");
+        printf("4- Listar utilizadores\n");
+        printf("5- Total de assinantes\n");
+        printf("6- Modo An√≥nimo\n");
+        printf("0- sair\n");
+        printf("Escolha uma op√ß√£o:\n");
+        scanf("%d", &opcao);
+        clear_input_buffer();
+
+        switch(opcao){
+            case 1: InserirDados(pessoas, &totalpessoas);
+                break;
+            case 2: funcaoLogin(totalpessoas, pessoas);
+                break;
+            case 3: consultardados(pessoas, totalpessoas);
+                break;
+            case 4: listardados(pessoas, totalpessoas);
+                break;
+            case 5: printf("\n total de assinantes: %d\n", totalpessoas);
+                break;
+            case 6:
+                system("cls");
+                printf("*   Bem vindo √† no one`   *\n");
+                break;
+            case 0:
+                system("cls");/*Para limpar o ecr√£*/
+                printf("\n\nVolte Sempre\n");
+                system("pause");
+                break;
+            default:
+                printf("Op√ß√£o invalida");
+        }
+        system ("pause");
+    } while (opcao!=0);
+
+    return 0;
 }
